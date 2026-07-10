@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="te" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="theme-color" content="#6d28d9" />
+  <title>ఆయాది గణితం · వాస్తు కాలిక్యులేటర్</title>
+
+  <!-- Icons + fonts (degrade gracefully if offline) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="డార్క్ మోడ్" title="థీమ్ మార్చు">
+        <span class="material-symbols-rounded" id="themeIcon">dark_mode</span>
+      </button>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="compass" aria-hidden="true"><span class="material-symbols-rounded">explore</span></div>
+      <div>
+        <h1>ఆయాది గణితం</h1>
+        <p>వాస్తు కొలతలు &amp; ఆయాది లెక్కింపు</p>
+      </div>
+    </header>
+
+    <!-- TABS -->
+    <nav class="tabs" role="tablist">
+      <button class="tab active" id="tabBtnCalc" data-tab="calc" role="tab" type="button">
+        <span class="material-symbols-rounded">calculate</span>కాలిక్యులేటర్
+      </button>
+      <button class="tab" id="tabBtnSuggest" data-tab="suggest" role="tab" type="button">
+        <span class="material-symbols-rounded">auto_fix_high</span>అనుకూలం
+      </button>
+      <button class="tab" id="tabBtnPadam" data-tab="padam" role="tab" type="button">
+        <span class="material-symbols-rounded">tag</span>పదము
+      </button>
+    </nav>
+
+    <!-- ===================== TAB 1: CALCULATOR ===================== -->
+    <div class="tabpanel" id="tab-calc">
+
+    <!-- Target padam banner (set from a suggestion via "వాడు") -->
+    <div class="padam-target" id="padamTarget" hidden>
+      <span class="material-symbols-rounded">bolt</span>
+      <span class="pt-text"></span>
+      <button type="button" class="pt-clear" id="padamClear" aria-label="తీసివేయి"><span class="material-symbols-rounded">close</span></button>
+    </div>
+
+    <!-- FORM -->
+    <form id="ayadiForm" novalidate>
+      <!-- Owner -->
+      <section class="card" aria-labelledby="owner-h">
+        <h2 class="section-title" id="owner-h"><span class="material-symbols-rounded">person</span>యజమాని వివరాలు</h2>
+        <div class="grid">
+          <div class="field">
+            <input type="text" id="name" name="name" placeholder=" " autocomplete="name" />
+            <label for="name">పేరు</label>
+            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>పేరు నమోదు చేయండి</span>
+          </div>
+          <div class="field has-select">
+            <select id="ownerNakshatra" name="ownerNakshatra"><option value="" selected disabled hidden></option></select>
+            <label for="ownerNakshatra">జన్మ నక్షత్రము</label>
+            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>నక్షత్రము ఎంచుకోండి</span>
+          </div>
+          <div class="field has-select">
+            <select id="direction" name="direction"><option value="" selected disabled hidden></option></select>
+            <label for="direction">దిక్కు</label>
+            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>దిక్కు ఎంచుకోండి</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Width -->
+      <section class="card" aria-labelledby="width-h">
+        <h2 class="section-title" id="width-h"><span class="material-symbols-rounded">swap_horiz</span>వెడల్పు</h2>
+        <div class="grid cols-3">
+          <div class="field">
+            <input type="number" id="widthFeet" placeholder=" " min="0" step="1" inputmode="numeric" />
+            <label for="widthFeet">అడుగులు</label>
+            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>తప్పు</span>
+          </div>
+          <div class="field">
+            <input type="number" id="widthInch" placeholder=" " min="0" max="11" step="1" inputmode="numeric" />
+            <label for="widthInch">అంగుళాలు</label>
+            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–11</span>
+          </div>
+          <div class="field">
+            <input type="number" id="widthNullu" placeholder=" " min="0" max="7" step="1" inputmode="numeric" />
+            <label for="widthNullu">నుళ్ళు</label>
+            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–7</span>
+          </div>
+        </div>
+        <span class="hint">1 అడుగు = 12 అంగుళాలు · 1 అంగుళం = 8 నుళ్ళు (ఆంధ్ర సంప్రదాయం)</span>
+      </section>
+
+      <!-- Depth -->
+      <section class="card" aria-labelledby="depth-h">
+        <h2 class="section-title" id="depth-h"><span class="material-symbols-rounded">swap_vert</span>పొడవు</h2>
+        <div class="grid cols-3">
+          <div class="field">
+            <input type="number" id="depthFeet" placeholder=" " min="0" step="1" inputmode="numeric" />
+            <label for="depthFeet">అడుగులు</label>
+            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>తప్పు</span>
+          </div>
+          <div class="field">
+            <input type="number" id="depthInch" placeholder=" " min="0" max="11" step="1" inputmode="numeric" />
+            <label for="depthInch">అంగుళాలు</label>
+            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–11</span>
+          </div>
+          <div class="field">
+            <input type="number" id="depthNullu" placeholder=" " min="0" max="7" step="1" inputmode="numeric" />
+            <label for="depthNullu">నుళ్ళు</label>
+            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–7</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Buttons -->
+      <div class="actions">
+        <button type="button" class="btn btn-clear" id="clearBtn">
+          <span class="material-symbols-rounded">restart_alt</span><span class="btn-label">చెరిపివేయి</span>
+        </button>
+        <button type="submit" class="btn btn-calc" id="calcBtn">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="material-symbols-rounded">calculate</span><span class="btn-label">లెక్కించు</span>
+        </button>
+      </div>
+    </form>
+    </div><!-- /tab-calc -->
+
+    <!-- ===================== TAB 2: SUITABLE DIMENSIONS ===================== -->
+    <div class="tabpanel" id="tab-suggest" hidden>
+      <section class="card">
+        <h2 class="section-title"><span class="material-symbols-rounded">auto_fix_high</span>అనుకూల కొలతలు</h2>
+        <p class="hint" style="margin:0 0 14px">
+          మీరు ఇచ్చిన పదము పరిధిలో — అన్ని ఆయాది విలువలు శుభంగా వచ్చే
+          ఖచ్చితమైన పదము విలువలను చూపిస్తుంది (వెడల్పు/పొడవు అవసరం లేదు).
+        </p>
+
+        <!-- Padam range -->
+        <label class="mini-label">పదము పరిధి</label>
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div class="field">
+            <input type="number" id="sPadamMin" placeholder=" " min="0" step="0.01" inputmode="decimal" />
+            <label for="sPadamMin">కనిష్ఠ పదము</label>
+          </div>
+          <div class="field">
+            <input type="number" id="sPadamMax" placeholder=" " min="0" step="0.01" inputmode="decimal" />
+            <label for="sPadamMax">గరిష్ఠ పదము</label>
+          </div>
+        </div>
+
+        <!-- Birth star — used to judge the నక్షత్రము factor (via పొంతన) -->
+        <label class="mini-label">నక్షత్రము విలువ కోసం</label>
+        <div class="field has-select">
+          <select id="sNakshatra"><option value="">— (నక్షత్రము విలువ ప్రకారం)</option></select>
+          <label for="sNakshatra" class="sr-only">జన్మ నక్షత్రము</label>
+        </div>
+
+        <div class="actions" style="grid-template-columns:1fr">
+          <button type="button" class="btn btn-calc" id="suggestBtn">
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="material-symbols-rounded">search</span><span class="btn-label">అనుకూల కొలతలు చూపించు</span>
+          </button>
+        </div>
+      </section>
+
+      <div id="suggestResults"><!-- rendered by ui.js --></div>
+    </div><!-- /tab-suggest -->
+
+    <!-- ===================== TAB 3: PADAM → CALCULATION ===================== -->
+    <div class="tabpanel" id="tab-padam" hidden>
+      <section class="card">
+        <h2 class="section-title"><span class="material-symbols-rounded">tag</span>పదముతో లెక్కింపు</h2>
+        <p class="hint" style="margin:0 0 14px">
+          పదము విలువను నేరుగా ఇచ్చి అన్ని ఆయాది ఫలితాలను పొందండి.
+        </p>
+
+        <label class="mini-label">పదము</label>
+        <div class="field">
+          <input type="number" id="pPadam" placeholder=" " min="0" step="0.001" inputmode="decimal" />
+          <label for="pPadam">పదము విలువ</label>
+        </div>
+
+        <label class="mini-label">వెడల్పు (ఐచ్ఛికం)</label>
+        <div class="grid cols-3">
+          <div class="field"><input type="number" id="pWidthFeet" placeholder=" " min="0" step="1" inputmode="numeric" /><label for="pWidthFeet">అడుగులు</label></div>
+          <div class="field"><input type="number" id="pWidthInch" placeholder=" " min="0" max="11" step="1" inputmode="numeric" /><label for="pWidthInch">అంగుళాలు</label></div>
+          <div class="field"><input type="number" id="pWidthNullu" placeholder=" " min="0" max="7" step="1" inputmode="numeric" /><label for="pWidthNullu">నుళ్ళు</label></div>
+        </div>
+
+        <label class="mini-label">పొడవు (ఐచ్ఛికం)</label>
+        <div class="grid cols-3">
+          <div class="field"><input type="number" id="pDepthFeet" placeholder=" " min="0" step="1" inputmode="numeric" /><label for="pDepthFeet">అడుగులు</label></div>
+          <div class="field"><input type="number" id="pDepthInch" placeholder=" " min="0" max="11" step="1" inputmode="numeric" /><label for="pDepthInch">అంగుళాలు</label></div>
+          <div class="field"><input type="number" id="pDepthNullu" placeholder=" " min="0" max="7" step="1" inputmode="numeric" /><label for="pDepthNullu">నుళ్ళు</label></div>
+        </div>
+        <span class="hint" style="margin:0 0 6px">వెడల్పు లేదా పొడవు ఇస్తే — పదముతో రెండోది స్వయంచాలకంగా.</span>
+
+        <label class="mini-label">నక్షత్ర పొంతన కోసం (ఐచ్ఛికం)</label>
+        <div class="field has-select">
+          <select id="pNakshatra"><option value="">— (పొంతన వద్దు)</option></select>
+          <label for="pNakshatra" class="sr-only">జన్మ నక్షత్రము</label>
+        </div>
+
+        <div class="actions" style="grid-template-columns:1fr">
+          <button type="button" class="btn btn-calc" id="padamCalcBtn">
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="material-symbols-rounded">calculate</span><span class="btn-label">లెక్కించు</span>
+          </button>
+        </div>
+      </section>
+
+      <div id="padamResults"><!-- rendered by ui.js --></div>
+    </div><!-- /tab-padam -->
+  </main>
+
+  <!-- BOTTOM SHEET RESULT -->
+  <div class="scrim" id="scrim"></div>
+  <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-handle"><span></span></div>
+    <div class="sheet-head">
+      <h2 id="sheetTitle">ఆయాది ఫలితం</h2>
+      <button class="sheet-close" id="sheetClose" type="button" aria-label="మూసివేయి"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="sheet-body" id="sheetBody"><!-- rendered by ui.js --></div>
+  </section>
+
+  <!-- SCRIPTS — load order matters: config → tables → units → engine → validation → result → ui -->
+  <script src="js/config.js"></script>
+  <script src="js/lookupTables.js"></script>
+  <script src="js/units.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/resultGenerator.js"></script>
+  <script src="js/suggest.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

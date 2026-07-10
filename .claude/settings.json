@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node /tmp/harness.js)",
+      "Bash(node --check js/ui.js)",
+      "Bash(node --check js/suggest.js)"
+    ]
+  }
+}
