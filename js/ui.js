@@ -218,15 +218,18 @@
     }
 
     var when = new Date().toLocaleDateString("te-IN", { year: "numeric", month: "long", day: "numeric" });
+    var bannerUrl = new URL("assets/banner.png", location.href).href;   // absolute → works in print window too
     var css =
       '.ayadi-pdf,.ayadi-pdf *{box-sizing:border-box}' +
-      '.ayadi-pdf{font-family:"Noto Sans Telugu","Inter",system-ui,sans-serif;color:#1a1a1a;background:#fff;line-height:1.3;font-size:11px;padding:32px}' +
-      '.ayadi-pdf header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:2.5px solid #6d28d9;padding-bottom:7px;margin-bottom:10px}' +
-      '.ayadi-pdf h1{font-size:17px;margin:0 0 2px;color:#6d28d9}' +
+      '.ayadi-pdf{position:relative;font-family:"Noto Sans Telugu","Inter",system-ui,sans-serif;color:#1a1a1a;background:#fff;line-height:1.3;font-size:11px;padding:32px}' +
+      '.ayadi-pdf .wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;max-width:540px;opacity:.07;z-index:0;pointer-events:none}' +
+      '.ayadi-pdf header,.ayadi-pdf h2,.ayadi-pdf table,.ayadi-pdf footer{position:relative;z-index:1}' +
+      '.ayadi-pdf header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:2.5px solid #6f1420;padding-bottom:7px;margin-bottom:10px}' +
+      '.ayadi-pdf h1{font-size:17px;margin:0 0 2px;color:#6f1420}' +
       '.ayadi-pdf .meta{font-size:10.5px;color:#555}' +
       '.ayadi-pdf .sender{text-align:right;font-size:10px;color:#444;line-height:1.4;white-space:nowrap}' +
-      '.ayadi-pdf .sender .sname{font-weight:700;color:#6d28d9;font-size:11.5px}' +
-      '.ayadi-pdf h2{font-size:12px;margin:11px 0 4px;color:#6d28d9}' +
+      '.ayadi-pdf .sender .sname{font-weight:700;color:#6f1420;font-size:11.5px}' +
+      '.ayadi-pdf h2{font-size:12px;margin:11px 0 4px;color:#6f1420}' +
       '.ayadi-pdf table{width:100%;border-collapse:collapse;font-size:10px;table-layout:fixed}' +
       '.ayadi-pdf th,.ayadi-pdf td{text-align:left;padding:3.5px 6px;border:1px solid #e3e3ea;vertical-align:top;word-break:break-word}' +
       '.ayadi-pdf th{width:16%;background:#f6f4fb;font-weight:600;color:#333;white-space:nowrap}' +
@@ -235,6 +238,7 @@
       '.ayadi-pdf footer{margin-top:12px;font-size:9px;color:#999;text-align:center}';
     var bodyHTML =
       '<div class="ayadi-pdf">' +
+      '<img class="wm" src="' + bannerUrl + '" alt="">' +
       '<header>' +
       '<div><h1>ఆయాది ఫలితం</h1>' +
       '<div class="meta">' + escapeHTML(j.name) + ' · ' + escapeHTML(when) + '</div></div>' +
@@ -281,7 +285,14 @@
     var target = host.querySelector(".ayadi-pdf");
 
     var fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
-    return fontsReady
+    // Wait for the watermark image to load (or fail) so html2canvas captures it.
+    var wmReady = new Promise(function (resolve) {
+      var wm = host.querySelector(".wm");
+      if (!wm || wm.complete) return resolve();
+      wm.addEventListener("load", resolve); wm.addEventListener("error", resolve);
+      setTimeout(resolve, 4000);   // don't hang if the asset is missing
+    });
+    return Promise.all([fontsReady, wmReady])
       .then(function () { return global.html2canvas(target, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false }); })
       .then(function (canvas) {
         var JsPDF = global.jspdf.jsPDF;
