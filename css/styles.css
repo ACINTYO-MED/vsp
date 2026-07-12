@@ -69,7 +69,7 @@ body {
   letter-spacing: normal; text-transform: none; white-space: nowrap; direction: ltr;
   font-variation-settings: "FILL" 1,"wght" 500,"GRAD" 0,"opsz" 24; user-select: none;
 }
-.app { max-width: var(--maxw); margin: 0 auto; padding: 20px 16px 120px; }
+.app { max-width: var(--maxw); margin: 0 auto; padding: 12px 14px 36px; }
 
 /* ---- top bar / theme toggle ---- */
 .topbar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
@@ -109,8 +109,8 @@ body {
 /* ---- brand banner (letterhead image) ---- */
 .brand { margin-bottom: 4px; }
 .brand-banner {
-  display: block; width: 100%; height: auto; border-radius: var(--r-lg);
-  border: 1px solid var(--border); box-shadow: var(--shadow-md);
+  display: block; width: 100%; height: auto;      /* full image, no crop */
+  border-radius: var(--r-lg); border: 1px solid var(--border); box-shadow: var(--shadow-md);
 }
 
 /* ---- compact calculator form ---- */
@@ -128,12 +128,12 @@ body {
 
 /* ---- tabs ---- */
 .tabs {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 16px; padding: 6px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; padding: 5px;
   border-radius: var(--r-pill); background: var(--surface); backdrop-filter: blur(var(--blur));
   -webkit-backdrop-filter: blur(var(--blur)); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
 }
 .tab {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 6px;
   border: none; cursor: pointer; border-radius: var(--r-pill); font-family: var(--font); font-weight: 700;
   font-size: .9rem; color: var(--text-2); background: transparent; transition: background .25s var(--ease), color .25s;
   -webkit-tap-highlight-color: transparent; white-space: nowrap;
@@ -236,18 +236,23 @@ body {
 .grid { display: grid; gap: 14px; }
 .grid.cols-3 { grid-template-columns: repeat(3,1fr); }
 .field { position: relative; }
-.field > label {
-  position: absolute; left: 14px; top: 15px; color: var(--text-3); font-size: 1rem; font-weight: 500;
+/* visually-hidden (screen-reader only) — must NOT render as a floating label */
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+.field > label:not(.sr-only) {
+  position: absolute; left: 14px; top: 13px; color: var(--text-3); font-size: 1rem; font-weight: 500;
   pointer-events: none; transform-origin: left center; transition: transform .2s var(--ease), color .2s var(--ease); padding: 0 4px;
 }
 .field input, .field select {
-  width: 100%; font-family: var(--font); font-size: 1rem; color: var(--text); padding: 22px 14px 8px;
+  width: 100%; font-family: var(--font); font-size: 1rem; color: var(--text); padding: 18px 14px 6px;
   border-radius: var(--r-md); border: 1.5px solid var(--border); background: var(--surface-2); outline: none;
   transition: border-color .2s, box-shadow .2s, background .3s; -webkit-appearance: none; appearance: none;
 }
 .field select { cursor: pointer; padding-right: 40px; }
 .field.has-select::after {
-  content: "expand_more"; font-family: "Material Symbols Rounded"; position: absolute; right: 12px; top: 18px;
+  content: "expand_more"; font-family: "Material Symbols Rounded"; position: absolute; right: 12px; top: 15px;
   color: var(--text-3); pointer-events: none; font-size: 22px;
 }
 .field input:focus, .field select:focus {
@@ -271,7 +276,16 @@ body {
 .field.invalid { animation: shake .4s var(--ease); }
 
 /* ---- buttons + ripple ---- */
-.actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 14px; margin-top: 22px; }
+.actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 12px; margin-top: 16px; }
+/* Calculator tab: pin the actions as a sticky bottom bar so the CTA is always in reach. */
+#tab-calc .actions {
+  position: sticky; bottom: 0; z-index: 20;
+  margin: 16px -14px 0; padding: 11px 14px calc(11px + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+}
+#tab-calc .actions .btn { padding-top: 14px; padding-bottom: 14px; }
 .btn {
   position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   border: none; cursor: pointer; user-select: none; font-family: var(--font); font-size: 1rem; font-weight: 700;
@@ -368,7 +382,7 @@ body {
 /* =========================================================================
    ANIMATIONS
    ========================================================================= */
-@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes ripple { to { transform: scale(2.6); opacity: 0; } }
 @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }

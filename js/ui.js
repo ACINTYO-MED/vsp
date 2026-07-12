@@ -327,18 +327,27 @@
     var text = "ఆయాది ఫలితం — " + name;
 
     generateResultPdfBlob().then(function (blob) {
-      // 1) Android WebView bridge — REQUIRED inside a native WebView (no Web Share
-      //    API there). Native code decodes the base64, saves the file and fires an
-      //    ACTION_SEND intent so WhatsApp receives the actual PDF. See ANDROID_SHARE.md.
-      if (global.AndroidShare && typeof global.AndroidShare.sharePdf === "function") {
-        return blobToBase64(blob).then(function (b64) { global.AndroidShare.sharePdf(b64, fileName, text); });
+      // Detect a native/Flutter WebView bridge. WebViews have NO Web Share API,
+      // so the file must go out through host code. See FLUTTER_SHARE.md.
+      var jc  = global.AndroidShare;                                   // webview_flutter JavaScriptChannel (postMessage only)
+      var iap = global.flutter_inappwebview;                           // flutter_inappwebview
+      var hasChannel = jc && typeof jc.postMessage === "function";
+      var hasInApp   = iap && typeof iap.callHandler === "function";
+      var hasNative  = jc && typeof jc.sharePdf === "function";        // native Android addJavascriptInterface
+
+      if (hasChannel || hasInApp || hasNative) {
+        return blobToBase64(blob).then(function (b64) {
+          if (hasChannel)      jc.postMessage(JSON.stringify({ base64: b64, fileName: fileName, text: text }));
+          else if (hasInApp)   iap.callHandler("sharePdf", b64, fileName, text);
+          else                 jc.sharePdf(b64, fileName, text);
+        });
       }
-      // 2) Web Share API (real mobile browsers) — file goes straight to WhatsApp.
+      // Web Share API (real mobile browsers) — file goes straight to WhatsApp.
       var file = new File([blob], fileName, { type: "application/pdf" });
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         return navigator.share({ files: [file], title: "ఆయాది ఫలితం", text: text });
       }
-      // 3) Desktop fallback — download the PDF, then open WhatsApp to attach it.
+      // Desktop fallback — download the PDF, then open WhatsApp to attach it.
       var url = URL.createObjectURL(blob);
       var a = document.createElement("a");
       a.href = url; a.download = fileName;
@@ -410,11 +419,9 @@
 
   /* ---- theme ---- */
   function initTheme() {
-    var btn = el("themeToggle"), icon = el("themeIcon");
-    var apply = function (t) { document.documentElement.setAttribute("data-theme", t); icon.textContent = t === "dark" ? "light_mode" : "dark_mode"; };
+    // Theme toggle removed; follow the OS preference for light/dark.
     var current = (global.matchMedia && global.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
-    apply(current);
-    btn.addEventListener("click", function () { current = current === "dark" ? "light" : "dark"; apply(current); });
+    document.documentElement.setAttribute("data-theme", current);
   }
 
   /* =======================================================================
