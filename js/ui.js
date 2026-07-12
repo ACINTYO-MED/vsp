@@ -631,15 +631,18 @@
   }
 
   function setTargetPadam(padam) {
-    targetPadam = padam;
+    targetPadam = padam;   // banner UI removed; auto-fill still active
     var banner = el("padamTarget");
-    $(".pt-text", banner).textContent =
-      "లక్ష్య పదము " + padam.toFixed(3) + " — వెడల్పు లేదా పొడవు నమోదు చేయండి; రెండోది స్వయంచాలకంగా.";
-    banner.hidden = false;
+    if (banner) {
+      $(".pt-text", banner).textContent =
+        "లక్ష్య పదము " + padam.toFixed(3) + " — వెడల్పు లేదా పొడవు నమోదు చేయండి; రెండోది స్వయంచాలకంగా.";
+      banner.hidden = false;
+    }
   }
   function clearTargetPadam() {
     targetPadam = null;
-    el("padamTarget").hidden = true;
+    var banner = el("padamTarget");
+    if (banner) banner.hidden = true;
   }
 
   /** Move a suggested padam into the calculator as the target; user provides one side. */
@@ -695,7 +698,8 @@
     ["depthFeet", "depthInch", "depthNullu"].forEach(function (id) {
       el(id).addEventListener("input", function () { autoComputeOther("depth"); });
     });
-    el("padamClear").addEventListener("click", clearTargetPadam);
+    var padamClearBtn = el("padamClear");
+    if (padamClearBtn) padamClearBtn.addEventListener("click", clearTargetPadam);
   }
 
   document.addEventListener("DOMContentLoaded", init);
