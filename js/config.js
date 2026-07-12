@@ -53,7 +53,11 @@
      * Replace with e.g. `function (area) { return area / 9; }` for a sq-yard
      * (గజం) based tradition. Kept as a function so it is trivially swappable. */
     padam: function (areaSqFt) {
-      return (areaSqFt/9);
+      // Full precision on purpose: an integer sq-ft area yields an exact-integer
+      // factor remainder (e.g. area 924 → padam 102.6̅ → (padam×9)%8 = 4.0), which
+      // the engine's 1-based row rule maps to the correct ordinal. Rounding padam
+      // here would perturb that remainder off the integer and pick the wrong row.
+      return areaSqFt / 9;
     },
 
     /* NUMERIC factors — result is a number: (padam * multiplier) % divisor.

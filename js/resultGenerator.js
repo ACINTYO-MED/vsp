@@ -25,9 +25,17 @@
            conv.feet.toFixed(3) + " అడుగులు)";
   }
 
-  /** Format a number for display WITHOUT altering its integer part (no rounding
-   *  of the value — just trims the visible decimals). */
-  function num(v, dp) { return Number(v).toFixed(dp === undefined ? 2 : dp); }
+  /** Format a number for display WITHOUT altering its integer part: truncates
+   *  (does NOT round) the visible decimals, so the shown integer part always
+   *  matches Math.floor(value) — the same basis the engine uses to pick a table
+   *  row. e.g. 2.996 → "2.99", never "3.00". Values carry ≤3 real decimals, so
+   *  toFixed(dp+4) first stabilises float noise (2.99599…981) before we slice. */
+  function num(v, dp) {
+    dp = (dp === undefined) ? 2 : dp;
+    var s = Number(v).toFixed(dp + 4);
+    var dot = s.indexOf(".");
+    return dp === 0 ? s.slice(0, dot) : s.slice(0, dot + 1 + dp);
+  }
 
   /** "value · name" for a lookup factor, e.g. "6.26 · గజ". */
   function lk(f) { return num(f.value) + " · " + f.label; }
@@ -53,7 +61,7 @@
       width: dimString(c.input.width, c.width),
       depth: dimString(c.input.depth, c.depth),
       areaSqFt: num(c.area.sqft, 3),
-      padam: num(c.padam, 3),
+      padam: Number(c.padam).toFixed(3),   // padam is a quantity → round for display (102.667)
       dhanam: num(c.dhanam),
       runam: num(c.runam),
       ayam: lk(c.ayam),
@@ -62,10 +70,10 @@
       amsa: num(c.amsa.value) + " · " + c.amsa.label + " · " + c.amsa.phala,
       nakshatra: lk(c.nakshatra),
       nakshatraCompatibility: c.nakshatraCompatibility.tara,
-      tithi: lk(c.tithi),
+      tithi: lk(c.tithi) + " · " + c.tithi.phala,
       vara: num(c.vara.value) + " · " + c.vara.label + " (" + c.vara.graha + ") · " + c.vara.phala,
       dikpati: num(c.dikpati.value) + " · " + c.dikpati.label + " (" + c.dikpati.dikku + ") · " + c.dikpati.phala,
-      karana: num(c.karana.value) + " · " + c.karana.label + " · " + c.karana.phala,
+      karana: lk(c.karana),
       recommendation: recommendation(c)
     };
   }

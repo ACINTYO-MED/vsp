@@ -31,21 +31,29 @@
   }
 
   /**
-   * LOOKUP factor. The remainder is kept as an exact decimal (`value`); only the
-   * table ROW is derived from it via Math.floor (an array index must be an
-   * integer — the value itself is never rounded).
-   *   value = (padam × multiplier) % divisor        → decimal, e.g. 6.265
-   *   row   = floor(value)                           → 0-based index into table
+   * LOOKUP factor — implements the spec's 1-based rule (see file header):
+   *   value = (padam × multiplier) % divisor          → decimal remainder, [0, divisor)
+   *   remainder r selects the r-th row; a remainder of exactly 0 selects the
+   *   divisor-th (last) row.  For a decimal remainder this is the (r-1, r] bucket,
+   *   i.e. row = ceil(value) - 1 (0-based).
+   *
+   * This equals Math.floor for every NON-integer remainder, so ordinary results
+   * are unchanged; it differs only when the remainder lands exactly on a whole
+   * number, where the value belongs to THAT ordinal (value 4 → 4th row) rather
+   * than being floored into the next one. Near-integer float noise is snapped so
+   * an exact boundary isn't missed.
    */
   function lookupFactor(padam, cfg) {
     var table = TABLES[cfg.table];
-    var value = (padam * cfg.multiplier) % cfg.divisor;   // exact decimal remainder
-    var idx = Math.floor(value);                          // table row (0-based)
+    var raw = (padam * cfg.multiplier) % cfg.divisor;     // exact decimal remainder
+    var snapped = Math.round(raw);
+    var value = (snapped >= 1 && Math.abs(raw - snapped) < 1e-6) ? snapped : raw;  // kill float noise
+    var idx = (value === 0) ? (cfg.divisor - 1) : (Math.ceil(value) - 1);          // 1-based row
     if (idx < 0) idx = 0;
     if (idx >= table.length) idx = table.length - 1;      // safety clamp
     var entry = table[idx];
     return {
-      value: value,                                       // exact, un-rounded
+      value: value,                                       // exact remainder (snapped at boundaries)
       index: idx,
       entry: entry,                                       // full row (for extra fields)
       key: (entry && entry.en) ? entry.en : String(entry),
@@ -91,10 +99,10 @@
 
   function calculateAmsa(padam)      { return withPhala(lookupFactor(padam, CONFIG.lookup.amsa)); }
   function calculateNakshatra(padam) { return lookupFactor(padam, CONFIG.lookup.nakshatra); }
-  function calculateTithi(padam)     { return lookupFactor(padam, CONFIG.lookup.tithi); }
+  function calculateTithi(padam)     { return withPhala(lookupFactor(padam, CONFIG.lookup.tithi)); }
   function calculateVara(padam)      { return withPhala(lookupFactor(padam, CONFIG.lookup.vara)); }
   function calculateDikpati(padam)   { return withPhala(lookupFactor(padam, CONFIG.lookup.dikpati)); }
-  function calculateKarana(padam)    { return withPhala(lookupFactor(padam, CONFIG.lookup.karana)); }
+  function calculateKarana(padam)    { return lookupFactor(padam, CONFIG.lookup.karana); }
 
   /**
    * NAKSHATRA COMPATIBILITY — owner nakshatra vs calculated nakshatra.

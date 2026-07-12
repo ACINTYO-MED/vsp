@@ -54,48 +54,70 @@
   ];
 
   // 30 Tithis (15 Shukla + 15 Krishna paksha).
+  // Good tithis (positions): 2,3,5,6,7,8,10,11,13,17,18,20,21 → శుభం; all others → అశుభం.
   var TITHI = [
-    { en: "Shukla Prathama", te: "శు. పాడ్యమి" }, { en: "Shukla Dwitiya", te: "శు. విదియ" }, { en: "Shukla Tritiya", te: "శు. తదియ" },
-    { en: "Shukla Chaturthi", te: "శు. చవితి" }, { en: "Shukla Panchami", te: "శు. పంచమి" }, { en: "Shukla Shashthi", te: "శు. షష్ఠి" },
-    { en: "Shukla Saptami", te: "శు. సప్తమి" }, { en: "Shukla Ashtami", te: "శు. అష్టమి" }, { en: "Shukla Navami", te: "శు. నవమి" },
-    { en: "Shukla Dashami", te: "శు. దశమి" }, { en: "Shukla Ekadashi", te: "శు. ఏకాదశి" }, { en: "Shukla Dwadashi", te: "శు. ద్వాదశి" },
-    { en: "Shukla Trayodashi", te: "శు. త్రయోదశి" }, { en: "Shukla Chaturdashi", te: "శు. చతుర్దశి" }, { en: "Purnima", te: "పౌర్ణమి" },
-    { en: "Krishna Prathama", te: "బ. పాడ్యమి" }, { en: "Krishna Dwitiya", te: "బ. విదియ" }, { en: "Krishna Tritiya", te: "బ. తదియ" },
-    { en: "Krishna Chaturthi", te: "బ. చవితి" }, { en: "Krishna Panchami", te: "బ. పంచమి" }, { en: "Krishna Shashthi", te: "బ. షష్ఠి" },
-    { en: "Krishna Saptami", te: "బ. సప్తమి" }, { en: "Krishna Ashtami", te: "బ. అష్టమి" }, { en: "Krishna Navami", te: "బ. నవమి" },
-    { en: "Krishna Dashami", te: "బ. దశమి" }, { en: "Krishna Ekadashi", te: "బ. ఏకాదశి" }, { en: "Krishna Dwadashi", te: "బ. ద్వాదశి" },
-    { en: "Krishna Trayodashi", te: "బ. త్రయోదశి" }, { en: "Krishna Chaturdashi", te: "బ. చతుర్దశి" }, { en: "Amavasya", te: "అమావాస్య" }
+    { en: "Shukla Prathama",   te: "శు. పాడ్యమి",  phala: "అశుభం", tone: "bad"  }, //  1
+    { en: "Shukla Dwitiya",    te: "శు. విదియ",    phala: "శుభం",  tone: "good" }, //  2
+    { en: "Shukla Tritiya",    te: "శు. తదియ",     phala: "శుభం",  tone: "good" }, //  3
+    { en: "Shukla Chaturthi",  te: "శు. చవితి",    phala: "అశుభం", tone: "bad"  }, //  4
+    { en: "Shukla Panchami",   te: "శు. పంచమి",    phala: "శుభం",  tone: "good" }, //  5
+    { en: "Shukla Shashthi",   te: "శు. షష్ఠి",    phala: "శుభం",  tone: "good" }, //  6
+    { en: "Shukla Saptami",    te: "శు. సప్తమి",   phala: "శుభం",  tone: "good" }, //  7
+    { en: "Shukla Ashtami",    te: "శు. అష్టమి",   phala: "శుభం",  tone: "good" }, //  8
+    { en: "Shukla Navami",     te: "శు. నవమి",     phala: "అశుభం", tone: "bad"  }, //  9
+    { en: "Shukla Dashami",    te: "శు. దశమి",     phala: "శుభం",  tone: "good" }, // 10
+    { en: "Shukla Ekadashi",   te: "శు. ఏకాదశి",   phala: "శుభం",  tone: "good" }, // 11
+    { en: "Shukla Dwadashi",   te: "శు. ద్వాదశి",  phala: "అశుభం", tone: "bad"  }, // 12
+    { en: "Shukla Trayodashi", te: "శు. త్రయోదశి", phala: "శుభం",  tone: "good" }, // 13
+    { en: "Shukla Chaturdashi",te: "శు. చతుర్దశి", phala: "అశుభం", tone: "bad"  }, // 14
+    { en: "Purnima",           te: "పౌర్ణమి",      phala: "అశుభం", tone: "bad"  }, // 15
+    { en: "Krishna Prathama",  te: "బ. పాడ్యమి",   phala: "అశుభం", tone: "bad"  }, // 16
+    { en: "Krishna Dwitiya",   te: "బ. విదియ",     phala: "శుభం",  tone: "good" }, // 17
+    { en: "Krishna Tritiya",   te: "బ. తదియ",      phala: "శుభం",  tone: "good" }, // 18
+    { en: "Krishna Chaturthi", te: "బ. చవితి",     phala: "అశుభం", tone: "bad"  }, // 19
+    { en: "Krishna Panchami",  te: "బ. పంచమి",     phala: "శుభం",  tone: "good" }, // 20
+    { en: "Krishna Shashthi",  te: "బ. షష్ఠి",     phala: "శుభం",  tone: "good" }, // 21
+    { en: "Krishna Saptami",   te: "బ. సప్తమి",    phala: "అశుభం", tone: "bad"  }, // 22
+    { en: "Krishna Ashtami",   te: "బ. అష్టమి",    phala: "అశుభం", tone: "bad"  }, // 23
+    { en: "Krishna Navami",    te: "బ. నవమి",      phala: "అశుభం", tone: "bad"  }, // 24
+    { en: "Krishna Dashami",   te: "బ. దశమి",      phala: "అశుభం", tone: "bad"  }, // 25
+    { en: "Krishna Ekadashi",  te: "బ. ఏకాదశి",    phala: "అశుభం", tone: "bad"  }, // 26
+    { en: "Krishna Dwadashi",  te: "బ. ద్వాదశి",   phala: "అశుభం", tone: "bad"  }, // 27
+    { en: "Krishna Trayodashi",te: "బ. త్రయోదశి",  phala: "అశుభం", tone: "bad"  }, // 28
+    { en: "Krishna Chaturdashi",te: "బ. చతుర్దశి", phala: "అశుభం", tone: "bad"  }, // 29
+    { en: "Amavasya",          te: "అమావాస్య",     phala: "అశుభం", tone: "bad"  }  // 30
   ];
 
-  // 11 Karanas, each with its phalitam (result) and a tone for colouring.
+  // 11 Karanas.
   var KARANA = [
-    { en: "Bava",       te: "బవ",            phala: "శుభం",   tone: "good" }, // 1
-    { en: "Balava",     te: "బాలవ",          phala: "శుభం",   tone: "good" }, // 2
-    { en: "Kaulava",    te: "కౌలవ",          phala: "శుభం",   tone: "good" }, // 3
-    { en: "Taitila",    te: "తైతిల",         phala: "శుభం",   tone: "good" }, // 4
-    { en: "Garaja",     te: "గరజ",           phala: "శుభం",   tone: "good" }, // 5
-    { en: "Vanija",     te: "వణిజ",          phala: "మధ్యమం", tone: ""     }, // 6
-    { en: "Vishti",     te: "విష్టి (భద్ర)", phala: "అశుభం",  tone: "bad"  }, // 7
-    { en: "Shakuni",    te: "శకుని",         phala: "అశుభం",  tone: "bad"  }, // 8
-    { en: "Chatushpada",te: "చతుష్పాద",      phala: "అశుభం",  tone: "bad"  }, // 9
-    { en: "Naga",       te: "నాగ",           phala: "అశుభం",  tone: "bad"  }, // 10
-    { en: "Kimstughna", te: "కింస్తుఘ్న",   phala: "శుభం",   tone: "good" }  // 11
+    { en: "Bava",       te: "బవ" },            // 1
+    { en: "Balava",     te: "బాలవ" },          // 2
+    { en: "Kaulava",    te: "కౌలవ" },          // 3
+    { en: "Taitila",    te: "తైతిల" },         // 4
+    { en: "Garaja",     te: "గరజ" },           // 5
+    { en: "Vanija",     te: "వణిజ" },          // 6
+    { en: "Vishti",     te: "విష్టి (భద్ర)" }, // 7
+    { en: "Shakuni",    te: "శకుని" },         // 8
+    { en: "Chatushpada",te: "చతుష్పాద" },      // 9
+    { en: "Naga",       te: "నాగ" },           // 10
+    { en: "Kimstughna", te: "కింస్తుఘ్న" }    // 11
   ];
 
   // 8 Dikpatis (direction lords) with their dikku, phalitam and tone.
+  // Classification: odd positions (1,3,5,7) are good; even (2,4,6,8) are bad.
   var DIKPATI = [
-    { en: "Indra",   te: "ఇంద్రుడు",         dikku: "తూర్పు",   phala: "శుభం",        tone: "good" }, // 1
-    { en: "Agni",    te: "అగ్ని",            dikku: "ఆగ్నేయం",  phala: "మధ్యమం",      tone: ""     }, // 2
-    { en: "Yama",    te: "యముడు",            dikku: "దక్షిణం",  phala: "అశుభం",       tone: "bad"  }, // 3
-    { en: "Nirruti", te: "నిరృతి",           dikku: "నైరుతి",   phala: "అశుభం",       tone: "bad"  }, // 4
-    { en: "Varuna",  te: "వరుణుడు",          dikku: "పడమర",     phala: "శుభం",        tone: "good" }, // 5
-    { en: "Vayu",    te: "వాయువు",           dikku: "వాయువ్యం", phala: "మధ్యమం",      tone: ""     }, // 6
-    { en: "Kubera",  te: "కుబేరుడు",         dikku: "ఉత్తరం",   phala: "అత్యంత శుభం", tone: "good" }, // 7
-    { en: "Ishana",  te: "ఈశానుడు (శివుడు)", dikku: "ఈశాన్యం",  phala: "అత్యంత శుభం", tone: "good" }  // 8
+    { en: "Indra",   te: "ఇంద్రుడు",         dikku: "తూర్పు",   phala: "శుభం",  tone: "good" }, // 1
+    { en: "Agni",    te: "అగ్ని",            dikku: "ఆగ్నేయం",  phala: "అశుభం", tone: "bad"  }, // 2
+    { en: "Yama",    te: "యముడు",            dikku: "దక్షిణం",  phala: "శుభం",  tone: "good" }, // 3
+    { en: "Nirruti", te: "నిరృతి",           dikku: "నైరుతి",   phala: "అశుభం", tone: "bad"  }, // 4
+    { en: "Varuna",  te: "వరుణుడు",          dikku: "పడమర",     phala: "శుభం",  tone: "good" }, // 5
+    { en: "Vayu",    te: "వాయువు",           dikku: "వాయువ్యం", phala: "అశుభం", tone: "bad"  }, // 6
+    { en: "Kubera",  te: "కుబేరుడు",         dikku: "ఉత్తరం",   phala: "శుభం",  tone: "good" }, // 7
+    { en: "Ishana",  te: "ఈశానుడు (శివుడు)", dikku: "ఈశాన్యం",  phala: "అశుభం", tone: "bad"  }  // 8
   ];
 
   // 9 Amsas, each with its phalitam (result) and a tone for good/bad colouring.
-  // Row order is significant — index maps 0..8 (floor of the Amsa remainder).
+  // Row order is significant — 1-based per the engine's spec (remainder r → r-th row).
   var AMSA = [
     { en: "Nashtamsa",  te: "నష్టాంశం",    phala: "అశుభం",        tone: "bad"  }, // 1
     { en: "Vriddhamsa", te: "వృద్ధాంశం",   phala: "శుభం",         tone: "good" }, // 2

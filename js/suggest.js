@@ -65,8 +65,10 @@
       ? compTone(ENGINE.calculateNakshatraCompatibility(ownerIdx, nak.index).rating)
       : lookupTone(nak);
 
-    var n2 = function (v) { return v.toFixed(2); };            // numeric factor value
-    var lk = function (f) { return f.value.toFixed(2) + " · " + f.label; };  // lookup: value · name
+    // Truncate (don't round) to 2 dp so the shown integer part matches the
+    // Math.floor(value) the engine uses to pick the row — e.g. 2.996 → "2.99".
+    var n2 = function (v) { var s = Number(v).toFixed(6); return s.slice(0, s.indexOf(".") + 3); }; // numeric factor value
+    var lk = function (f) { return n2(f.value) + " · " + f.label; };                                // lookup: value · name
 
     // ధనము must exceed రుణము (wealth > debt) — both factors reflect this.
     var wealthOk = dhanam > runam;

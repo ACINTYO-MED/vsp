@@ -230,7 +230,11 @@
     <div class="sheet-handle"><span></span></div>
     <div class="sheet-head">
       <h2 id="sheetTitle">ఆయాది ఫలితం</h2>
-      <button class="sheet-close" id="sheetClose" type="button" aria-label="మూసివేయి"><span class="material-symbols-rounded">close</span></button>
+      <div class="sheet-actions">
+        <button class="sheet-close" id="sheetShare" type="button" aria-label="WhatsApp షేర్" title="WhatsApp లో PDF షేర్"><span class="material-symbols-rounded">share</span></button>
+        <button class="sheet-close" id="sheetPdf" type="button" aria-label="PDF దిగుమతి" title="PDF దిగుమతి"><span class="material-symbols-rounded">picture_as_pdf</span></button>
+        <button class="sheet-close" id="sheetClose" type="button" aria-label="మూసివేయి"><span class="material-symbols-rounded">close</span></button>
+      </div>
     </div>
     <div class="sheet-body" id="sheetBody"><!-- rendered by ui.js --></div>
   </section>
@@ -243,6 +247,9 @@
   <script src="js/validation.js"></script>
   <script src="js/resultGenerator.js"></script>
   <script src="js/suggest.js"></script>
+  <!-- PDF generation (local, for real-file WhatsApp share) -->
+  <script src="js/vendor/jspdf.umd.min.js"></script>
+  <script src="js/vendor/html2canvas.min.js"></script>
   <script src="js/ui.js"></script>
 </body>
 </html>

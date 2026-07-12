@@ -11,6 +11,8 @@
 (function (global, CONFIG, TABLES, UNITS, ENGINE, VALIDATION, RESULT, SUGGEST) {
   "use strict";
   var AyadiUnits = UNITS, AyadiSuggest = SUGGEST;   // local aliases
+  var lastRendered = null;                          // {json, area, computed} for PDF export
+  var SENDER = { name: "P.ప్రసాద్ శర్మ", place: "కేసానుపల్లి", phone: "9440938238" };  // PDF letterhead
 
   /* ---- tiny DOM helpers ---- */
   var $ = function (s, c) { return (c || document).querySelector(s); };
@@ -114,8 +116,7 @@
   function renderResult(computed) {
     var json = RESULT.toJSON(computed);
     var area = RESULT.areaBreakdown(computed);
-    var s = RESULT.score(computed);
-    var rating = RESULT.rating(s);
+    lastRendered = { json: json, area: area, computed: computed };   // for PDF export
 
     // tone is derived from the language-neutral computed keys (not the Telugu JSON)
     var ayamGood = computed.ayam.status === "Good";
@@ -150,40 +151,176 @@
       { label: "అంశ", value: json.amsa, tone: computed.amsa.tone },
       { label: "నక్షత్రము", value: json.nakshatra },
       { label: "నక్షత్ర పొంతన", value: json.nakshatraCompatibility, tone: compTone },
-      { label: "తిథి", value: json.tithi },
+      { label: "తిథి", value: json.tithi, tone: computed.tithi.tone },
       { label: "వారము", value: json.vara, tone: computed.vara.tone },
       { label: "దిక్పతి", value: json.dikpati, tone: computed.dikpati.tone },
-      { label: "కరణము", value: json.karana, tone: computed.karana.tone }
+      { label: "కరణము", value: json.karana }
     ];
 
     var body = el("sheetBody");
     body.innerHTML =
-      // Progress circle
-      '<div class="score-block">' +
-        '<div class="gauge"><svg viewBox="0 0 120 120" aria-hidden="true"><defs>' +
-        '<linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs>' +
-        '<circle class="track" cx="60" cy="60" r="52"></circle>' +
-        '<circle class="prog" id="scoreArc" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle></svg>' +
-        '<div class="gauge-center"><span class="num" id="scoreNum">0</span><span class="den">వాస్తు స్కోరు / 100</span></div></div>' +
-        '<span class="rating-badge tone-' + rating.tone + '">' +
-        '<span class="material-symbols-rounded" style="font-size:18px">' +
-        (rating.tone === "good" ? "verified" : rating.tone === "warn" ? "info" : "warning") + "</span>" + rating.label + "</span>" +
-      "</div>" +
-      // Recommendation
-      '<div class="reco">' + json.recommendation + "</div>" +
-      // Collapsible sections
+      // Collapsible sections (score gauge, rating badge and recommendation intentionally omitted)
       collapsible("యజమాని &amp; స్థలం", "person", table(summary), true) +
       collapsible("వైశాల్యం &amp; పదము", "square_foot", table(areaItems), true) +
-      collapsible("ఆయాది వివరాలు", "calculate", table(factors), true) +
-      collapsible("వివరాలు (JSON)", "data_object", '<pre class="json-box">' + escapeHTML(JSON.stringify(json, null, 2)) + "</pre>", false);
+      collapsible("ఆయాది వివరాలు", "calculate", table(factors), true);
 
     wireCollapsibles();
     openSheet();
-    animateGauge(s);
   }
 
   function escapeHTML(str) {
-    return str.replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; });
+    return String(str).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; });
+  }
+
+  /* ---- Printable/shareable result content (score/gauge/recommendation omitted) ---- */
+  // Returns { css, bodyHTML, name } for the current result, or null if none.
+  // CSS is scoped under `.ayadi-pdf` so it's safe to inject into any document.
+  function buildResultContent() {
+    if (!lastRendered) return null;
+    var j = lastRendered.json, a = lastRendered.area, c = lastRendered.computed;
+
+    var ayamGood = c.ayam.status === "Good";
+    var compKey = c.nakshatraCompatibility.rating;
+    var compTone = (compKey === "Bad" || compKey === "Very Bad") ? "bad" :
+                   (compKey === "Excellent" || compKey === "Good") ? "good" : "";
+
+    // Each row: [label, value, tone?]. Values are escaped (name is user input).
+    var summary = [
+      ["పేరు", j.name], ["జన్మ నక్షత్రము", j.ownerNakshatra], ["దిక్కు", j.direction],
+      ["వెడల్పు", j.width], ["పొడవు", j.depth]
+    ];
+    var areaItems = [
+      ["చదరపు అడుగులు", a.sqft], ["చదరపు అంగుళాలు", a.sqin], ["అంగుళం", a.angula],
+      ["హస్తం", a.hasta], ["పదము", j.padam]
+    ];
+    var factors = [
+      ["ధనము", j.dhanam], ["రుణము", j.runam],
+      ["ఆయము", j.ayam + " · " + j.ayamStatus, ayamGood ? "good" : "bad"],
+      ["ఆయుష్షు", j.ayushu, c.ayushu.tone], ["అంశ", j.amsa, c.amsa.tone],
+      ["నక్షత్రము", j.nakshatra], ["నక్షత్ర పొంతన", j.nakshatraCompatibility, compTone],
+      ["తిథి", j.tithi, c.tithi.tone], ["వారము", j.vara, c.vara.tone],
+      ["దిక్పతి", j.dikpati, c.dikpati.tone], ["కరణము", j.karana]
+    ];
+
+    // Two items per row (label|value|label|value) to stay compact on one A4 page.
+    function cell(item) {
+      if (!item) return '<th></th><td></td>';
+      return '<th>' + escapeHTML(item[0]) + '</th><td class="' + (item[2] || "") + '">' +
+             escapeHTML(item[1]) + '</td>';
+    }
+    function rows(list) {
+      var out = "";
+      for (var i = 0; i < list.length; i += 2) out += '<tr>' + cell(list[i]) + cell(list[i + 1]) + '</tr>';
+      return out;
+    }
+    function section(title, list) {
+      return '<h2>' + escapeHTML(title) + '</h2><table>' + rows(list) + '</table>';
+    }
+
+    var when = new Date().toLocaleDateString("te-IN", { year: "numeric", month: "long", day: "numeric" });
+    var css =
+      '.ayadi-pdf,.ayadi-pdf *{box-sizing:border-box}' +
+      '.ayadi-pdf{font-family:"Noto Sans Telugu","Inter",system-ui,sans-serif;color:#1a1a1a;background:#fff;line-height:1.3;font-size:11px;padding:32px}' +
+      '.ayadi-pdf header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:2.5px solid #6d28d9;padding-bottom:7px;margin-bottom:10px}' +
+      '.ayadi-pdf h1{font-size:17px;margin:0 0 2px;color:#6d28d9}' +
+      '.ayadi-pdf .meta{font-size:10.5px;color:#555}' +
+      '.ayadi-pdf .sender{text-align:right;font-size:10px;color:#444;line-height:1.4;white-space:nowrap}' +
+      '.ayadi-pdf .sender .sname{font-weight:700;color:#6d28d9;font-size:11.5px}' +
+      '.ayadi-pdf h2{font-size:12px;margin:11px 0 4px;color:#6d28d9}' +
+      '.ayadi-pdf table{width:100%;border-collapse:collapse;font-size:10px;table-layout:fixed}' +
+      '.ayadi-pdf th,.ayadi-pdf td{text-align:left;padding:3.5px 6px;border:1px solid #e3e3ea;vertical-align:top;word-break:break-word}' +
+      '.ayadi-pdf th{width:16%;background:#f6f4fb;font-weight:600;color:#333;white-space:nowrap}' +
+      '.ayadi-pdf td{width:34%}' +
+      '.ayadi-pdf td.good{color:#0a7d32;font-weight:600}.ayadi-pdf td.bad{color:#c02626;font-weight:600}' +
+      '.ayadi-pdf footer{margin-top:12px;font-size:9px;color:#999;text-align:center}';
+    var bodyHTML =
+      '<div class="ayadi-pdf">' +
+      '<header>' +
+      '<div><h1>ఆయాది ఫలితం</h1>' +
+      '<div class="meta">' + escapeHTML(j.name) + ' · ' + escapeHTML(when) + '</div></div>' +
+      '<div class="sender"><div class="sname">' + escapeHTML(SENDER.name) + '</div>' +
+      '<div>' + escapeHTML(SENDER.place) + '</div><div>' + escapeHTML(SENDER.phone) + '</div></div>' +
+      '</header>' +
+      section("యజమాని & స్థలం", summary) +
+      section("వైశాల్యం & పదము", areaItems) +
+      section("ఆయాది వివరాలు", factors) +
+      '<footer>ఆయాది గణితం · వాస్తు కాలిక్యులేటర్</footer>' +
+      '</div>';
+    return { css: css, bodyHTML: bodyHTML, name: j.name };
+  }
+
+  /* ---- PDF via print dialog (Save as PDF) ---- */
+  function downloadResultPdf() {
+    var p = buildResultContent();
+    if (!p) return;
+    var doc =
+      '<!DOCTYPE html><html lang="te"><head><meta charset="utf-8">' +
+      '<title>ఆయాది ఫలితం — ' + escapeHTML(p.name) + '</title>' +
+      '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">' +
+      '<style>@page{size:A4;margin:0}html,body{margin:0}' + p.css + '</style></head><body>' +
+      p.bodyHTML +
+      '<script>window.onload=function(){window.focus();window.print();};' +
+      'window.onafterprint=function(){window.close();};<\/script>' +
+      '</body></html>';
+    var win = window.open("", "_blank");
+    if (!win) { alert("PDF కోసం పాప్-అప్‌ను అనుమతించండి."); return; }
+    win.document.open(); win.document.write(doc); win.document.close();
+  }
+
+  /* ---- Render the current result to a real single-page A4 PDF Blob ---- */
+  // Uses html2canvas (captures Telugu correctly) + jsPDF (wraps the raster in A4).
+  function generateResultPdfBlob() {
+    var p = buildResultContent();
+    if (!p) return Promise.reject(new Error("ఫలితం లేదు"));
+    if (!global.html2canvas || !global.jspdf) return Promise.reject(new Error("PDF లైబ్రరీ లోడ్ కాలేదు"));
+
+    var host = document.createElement("div");
+    host.setAttribute("style", "position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1;");
+    host.innerHTML = "<style>" + p.css + "</style>" + p.bodyHTML;   // 794px ≈ A4 width @96dpi
+    document.body.appendChild(host);
+    var target = host.querySelector(".ayadi-pdf");
+
+    var fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    return fontsReady
+      .then(function () { return global.html2canvas(target, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false }); })
+      .then(function (canvas) {
+        var JsPDF = global.jspdf.jsPDF;
+        var pdf = new JsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+        var pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight();
+        var imgW = pw, imgH = canvas.height * pw / canvas.width;          // fit to page width
+        if (imgH > ph) { imgH = ph; imgW = canvas.width * ph / canvas.height; }  // clamp to one page
+        pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", (pw - imgW) / 2, 0, imgW, imgH);
+        host.remove();
+        return pdf.output("blob");
+      })
+      .catch(function (err) { host.remove(); throw err; });
+  }
+
+  /* ---- Share the PDF to WhatsApp (native share sheet) with graceful fallback ---- */
+  function sharePdfWhatsApp() {
+    if (!lastRendered) return;
+    var btn = el("sheetShare");
+    if (btn) btn.disabled = true;
+    var name = (lastRendered.json.name || "result");
+    var fileName = "ayadi-" + name.replace(/[\s\\/:*?"<>|]+/g, "-") + ".pdf";
+
+    generateResultPdfBlob().then(function (blob) {
+      var file = new File([blob], fileName, { type: "application/pdf" });
+      var shareData = { files: [file], title: "ఆయాది ఫలితం", text: "ఆయాది ఫలితం — " + name };
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        return navigator.share(shareData);          // mobile: WhatsApp appears in the sheet
+      }
+      // Desktop / unsupported: download the PDF, then open WhatsApp so the user can attach it.
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = fileName;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      window.open("https://wa.me/?text=" + encodeURIComponent("ఆయాది ఫలితం — " + name + " (దిగుమతైన PDF ను జతచేయండి)"), "_blank");
+    }).catch(function (err) {
+      if (err && err.name === "AbortError") return;  // user dismissed the share sheet
+      alert("PDF షేర్ విఫలమైంది: " + (err && err.message ? err.message : err));
+    }).then(function () { if (btn) btn.disabled = false; });
   }
 
   /* ---- collapsible behaviour ---- */
@@ -314,8 +451,10 @@
   }
 
   function renderPadamReport(c, dims) {
-    var n2 = function (v) { return v.toFixed(2); };
-    var lk = function (f) { return f.value.toFixed(2) + " · " + f.label; };
+    // Truncate (don't round) to 2 dp so the shown integer part matches the
+    // Math.floor(value) the engine uses to pick the row — e.g. 2.996 → "2.99".
+    var n2 = function (v) { var s = Number(v).toFixed(6); return s.slice(0, s.indexOf(".") + 3); };
+    var lk = function (f) { return n2(f.value) + " · " + f.label; };
     var statusTe = c.ayam.status === "Good" ? "శుభం" : "అశుభం";
 
     var items = [{ label: "పదము", value: c.padam.toFixed(3) }];
@@ -334,10 +473,10 @@
       { label: "అంశ",         value: lk(c.amsa) + " · " + c.amsa.phala, tone: c.amsa.tone },
       { label: "నక్షత్రము",    value: lk(c.nakshatra) },
       { label: "నక్షత్ర పొంతన", value: c.nakshatraCompatibility.tara || "—", tone: compToneOf(c.nakshatraCompatibility.rating) },
-      { label: "తిథి",        value: lk(c.tithi) },
+      { label: "తిథి",        value: lk(c.tithi) + " · " + c.tithi.phala, tone: c.tithi.tone },
       { label: "వారము",       value: lk(c.vara) + " (" + c.vara.graha + ") · " + c.vara.phala, tone: c.vara.tone },
       { label: "దిక్పతి",      value: lk(c.dikpati) + " (" + c.dikpati.dikku + ") · " + c.dikpati.phala, tone: c.dikpati.tone },
-      { label: "కరణము",       value: lk(c.karana) + " · " + c.karana.phala, tone: c.karana.tone }
+      { label: "కరణము",       value: lk(c.karana) }
     );
     el("padamResults").innerHTML =
       '<div class="card"><h2 class="section-title"><span class="material-symbols-rounded">summarize</span>ఫలిత నివేదిక</h2>' +
@@ -492,6 +631,8 @@
     el("clearBtn").addEventListener("click", clearForm);
     el("scrim").addEventListener("click", closeSheet);
     el("sheetClose").addEventListener("click", closeSheet);
+    el("sheetPdf").addEventListener("click", downloadResultPdf);
+    el("sheetShare").addEventListener("click", sharePdfWhatsApp);
     $$("input, select").forEach(function (inp) {
       inp.addEventListener("input", function () { var f = fieldOf(inp); if (f) f.classList.remove("invalid"); });
     });
