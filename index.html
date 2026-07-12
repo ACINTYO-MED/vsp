@@ -23,13 +23,11 @@
       </button>
     </div>
 
-    <!-- HEADER -->
-    <header class="header">
-      <div class="compass" aria-hidden="true"><span class="material-symbols-rounded">explore</span></div>
-      <div>
-        <h1>ఆయాది గణితం</h1>
-        <p>వాస్తు కొలతలు &amp; ఆయాది లెక్కింపు</p>
-      </div>
+    <!-- BRAND BANNER -->
+    <header class="brand">
+      <img class="brand-banner" src="assets/banner.png"
+           alt="పి ప్రసాద్ శర్మ — వాస్తు సిద్ధాంతి · 9440938238"
+           onerror="this.style.display='none';" />
     </header>
 
     <!-- TABS -->
@@ -60,8 +58,8 @@
       <!-- Owner -->
       <section class="card" aria-labelledby="owner-h">
         <h2 class="section-title" id="owner-h"><span class="material-symbols-rounded">person</span>యజమాని వివరాలు</h2>
-        <div class="grid">
-          <div class="field">
+        <div class="grid grid-owner">
+          <div class="field span-2">
             <input type="text" id="name" name="name" placeholder=" " autocomplete="name" />
             <label for="name">పేరు</label>
             <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>పేరు నమోదు చేయండి</span>
@@ -79,49 +77,50 @@
         </div>
       </section>
 
-      <!-- Width -->
-      <section class="card" aria-labelledby="width-h">
-        <h2 class="section-title" id="width-h"><span class="material-symbols-rounded">swap_horiz</span>వెడల్పు</h2>
-        <div class="grid cols-3">
-          <div class="field">
-            <input type="number" id="widthFeet" placeholder=" " min="0" step="1" inputmode="numeric" />
-            <label for="widthFeet">అడుగులు</label>
-            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>తప్పు</span>
+      <!-- Measurements (width + depth combined) -->
+      <section class="card" aria-labelledby="dim-h">
+        <h2 class="section-title" id="dim-h"><span class="material-symbols-rounded">straighten</span>కొలతలు</h2>
+        <div class="dim">
+          <span class="dim-name">వెడల్పు</span>
+          <div class="grid cols-3">
+            <div class="field">
+              <input type="number" id="widthFeet" placeholder=" " min="0" step="1" inputmode="numeric" />
+              <label for="widthFeet">అడుగులు</label>
+              <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>తప్పు</span>
+            </div>
+            <div class="field">
+              <input type="number" id="widthInch" placeholder=" " min="0" max="11" step="1" inputmode="numeric" />
+              <label for="widthInch">అంగుళాలు</label>
+              <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–11</span>
+            </div>
+            <div class="field">
+              <input type="number" id="widthNullu" placeholder=" " min="0" max="7" step="1" inputmode="numeric" />
+              <label for="widthNullu">నుళ్ళు</label>
+              <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–7</span>
+            </div>
           </div>
-          <div class="field">
-            <input type="number" id="widthInch" placeholder=" " min="0" max="11" step="1" inputmode="numeric" />
-            <label for="widthInch">అంగుళాలు</label>
-            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–11</span>
-          </div>
-          <div class="field">
-            <input type="number" id="widthNullu" placeholder=" " min="0" max="7" step="1" inputmode="numeric" />
-            <label for="widthNullu">నుళ్ళు</label>
-            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–7</span>
+        </div>
+        <div class="dim">
+          <span class="dim-name">పొడవు</span>
+          <div class="grid cols-3">
+            <div class="field">
+              <input type="number" id="depthFeet" placeholder=" " min="0" step="1" inputmode="numeric" />
+              <label for="depthFeet">అడుగులు</label>
+              <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>తప్పు</span>
+            </div>
+            <div class="field">
+              <input type="number" id="depthInch" placeholder=" " min="0" max="11" step="1" inputmode="numeric" />
+              <label for="depthInch">అంగుళాలు</label>
+              <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–11</span>
+            </div>
+            <div class="field">
+              <input type="number" id="depthNullu" placeholder=" " min="0" max="7" step="1" inputmode="numeric" />
+              <label for="depthNullu">నుళ్ళు</label>
+              <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–7</span>
+            </div>
           </div>
         </div>
         <span class="hint">1 అడుగు = 12 అంగుళాలు · 1 అంగుళం = 8 నుళ్ళు (ఆంధ్ర సంప్రదాయం)</span>
-      </section>
-
-      <!-- Depth -->
-      <section class="card" aria-labelledby="depth-h">
-        <h2 class="section-title" id="depth-h"><span class="material-symbols-rounded">swap_vert</span>పొడవు</h2>
-        <div class="grid cols-3">
-          <div class="field">
-            <input type="number" id="depthFeet" placeholder=" " min="0" step="1" inputmode="numeric" />
-            <label for="depthFeet">అడుగులు</label>
-            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>తప్పు</span>
-          </div>
-          <div class="field">
-            <input type="number" id="depthInch" placeholder=" " min="0" max="11" step="1" inputmode="numeric" />
-            <label for="depthInch">అంగుళాలు</label>
-            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–11</span>
-          </div>
-          <div class="field">
-            <input type="number" id="depthNullu" placeholder=" " min="0" max="7" step="1" inputmode="numeric" />
-            <label for="depthNullu">నుళ్ళు</label>
-            <span class="error-msg" role="alert"><span class="material-symbols-rounded">error</span>0–7</span>
-          </div>
-        </div>
       </section>
 
       <!-- Buttons -->

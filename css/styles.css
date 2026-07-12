@@ -104,6 +104,26 @@ body {
 }
 .header p { margin: 3px 0 0; color: var(--text-2); font-size: .86rem; font-weight: 500; }
 
+/* ---- brand banner (letterhead image) ---- */
+.brand { margin-bottom: 4px; }
+.brand-banner {
+  display: block; width: 100%; height: auto; border-radius: var(--r-lg);
+  border: 1px solid var(--border); box-shadow: var(--shadow-md);
+}
+
+/* ---- compact calculator form ---- */
+#tab-calc .card { margin-top: 12px; padding: 14px 16px; }
+#tab-calc .section-title { font-size: .98rem; margin: 0 0 12px; }
+#tab-calc .section-title .material-symbols-rounded { font-size: 20px; padding: 6px; border-radius: 10px; }
+#tab-calc .grid { gap: 10px; }
+.dim { margin-bottom: 12px; }
+.dim:last-of-type { margin-bottom: 6px; }
+.dim-name { display: block; margin: 0 2px 7px; font-size: .82rem; font-weight: 700; color: var(--text-2); }
+
+/* owner card: పేరు full-width, నక్షత్రము + దిక్కు side by side */
+.grid-owner { grid-template-columns: repeat(2, 1fr); }
+.grid-owner .span-2 { grid-column: 1 / -1; }
+
 /* ---- tabs ---- */
 .tabs {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 16px; padding: 6px;

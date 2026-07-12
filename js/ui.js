@@ -296,27 +296,44 @@
       .catch(function (err) { host.remove(); throw err; });
   }
 
-  /* ---- Share the PDF to WhatsApp (native share sheet) with graceful fallback ---- */
+  /* ---- Blob → bare base64 (no data: prefix), for passing to the Android bridge ---- */
+  function blobToBase64(blob) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { var s = String(r.result); resolve(s.slice(s.indexOf(",") + 1)); };
+      r.onerror = function () { reject(new Error("PDF ఎన్‌కోడ్ విఫలమైంది")); };
+      r.readAsDataURL(blob);
+    });
+  }
+
+  /* ---- Share the PDF to WhatsApp, choosing the best channel for the platform ---- */
   function sharePdfWhatsApp() {
     if (!lastRendered) return;
     var btn = el("sheetShare");
     if (btn) btn.disabled = true;
     var name = (lastRendered.json.name || "result");
     var fileName = "ayadi-" + name.replace(/[\s\\/:*?"<>|]+/g, "-") + ".pdf";
+    var text = "ఆయాది ఫలితం — " + name;
 
     generateResultPdfBlob().then(function (blob) {
-      var file = new File([blob], fileName, { type: "application/pdf" });
-      var shareData = { files: [file], title: "ఆయాది ఫలితం", text: "ఆయాది ఫలితం — " + name };
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        return navigator.share(shareData);          // mobile: WhatsApp appears in the sheet
+      // 1) Android WebView bridge — REQUIRED inside a native WebView (no Web Share
+      //    API there). Native code decodes the base64, saves the file and fires an
+      //    ACTION_SEND intent so WhatsApp receives the actual PDF. See ANDROID_SHARE.md.
+      if (global.AndroidShare && typeof global.AndroidShare.sharePdf === "function") {
+        return blobToBase64(blob).then(function (b64) { global.AndroidShare.sharePdf(b64, fileName, text); });
       }
-      // Desktop / unsupported: download the PDF, then open WhatsApp so the user can attach it.
+      // 2) Web Share API (real mobile browsers) — file goes straight to WhatsApp.
+      var file = new File([blob], fileName, { type: "application/pdf" });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        return navigator.share({ files: [file], title: "ఆయాది ఫలితం", text: text });
+      }
+      // 3) Desktop fallback — download the PDF, then open WhatsApp to attach it.
       var url = URL.createObjectURL(blob);
       var a = document.createElement("a");
       a.href = url; a.download = fileName;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
-      window.open("https://wa.me/?text=" + encodeURIComponent("ఆయాది ఫలితం — " + name + " (దిగుమతైన PDF ను జతచేయండి)"), "_blank");
+      window.open("https://wa.me/?text=" + encodeURIComponent(text + " (దిగుమతైన PDF ను జతచేయండి)"), "_blank");
     }).catch(function (err) {
       if (err && err.name === "AbortError") return;  // user dismissed the share sheet
       alert("PDF షేర్ విఫలమైంది: " + (err && err.message ? err.message : err));
